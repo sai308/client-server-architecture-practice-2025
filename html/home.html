@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>NodeJS App — Home</title>
+  <style>
+    :root{--bg:#0f1724;--card:#0b1220;--muted:#9aa4b2;--accent:#6ee7b7;--mono:ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Segoe UI Mono", monospace}
+    body{font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; margin:0; background:linear-gradient(180deg,#071126 0%, #071226 100%); color:#e6eef6; min-height:100vh}
+    .container{max-width:1100px;margin:28px auto;padding:24px}
+    header{display:flex;align-items:center;gap:14px}
+    .logo{width:56px;height:56px;border-radius:8px;background:linear-gradient(135deg,var(--accent),#60a5fa);display:flex;align-items:center;justify-content:center;color:#032; font-weight:700}
+    h1{margin:0;font-size:1.4rem}
+    p.lead{margin:6px 0 20px;color:var(--muted)}
+    .grid{display:grid;grid-template-columns:1fr 360px;gap:20px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03);padding:16px;border-radius:10px}
+    h2{margin:0 0 10px;font-size:1.05rem}
+    pre{background:#02101a;color:#dff7ee;padding:12px;border-radius:6px;overflow:auto;font-family:var(--mono);font-size:0.9rem}
+    code{font-family:var(--mono)}
+    .muted{color:var(--muted);font-size:0.95rem}
+    .small{font-size:0.9rem;color:var(--muted)}
+    .routes{display:flex;flex-direction:column;gap:8px}
+    .route{display:flex;align-items:center;gap:12px;padding:10px;border-radius:8px;background:rgba(255,255,255,0.02);border:1px dashed rgba(255,255,255,0.01)}
+    .method{padding:6px 8px;border-radius:6px;font-weight:700;font-size:0.85rem}
+    .GET{background:#064e3b;color:var(--accent)}
+    .POST{background:#1e3a8a;color:#a5b4fc}
+    .PUT{background:#92400e;color:#ffd9b3}
+    .DELETE{background:#7f1d1d;color:#ffb4b4}
+    .endpoint{font-family:var(--mono);color:#e6f3ff}
+    .copy{background:#06202a;border:none;color:var(--accent);padding:6px 8px;border-radius:6px;cursor:pointer}
+    footer{margin-top:18px;text-align:right;color:var(--muted);font-size:0.85rem}
+    a{color:var(--accent);text-decoration:none}
+    @media (max-width:880px){.grid{grid-template-columns:1fr;}.card{padding:12px}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">N</div>
+      <div>
+        <h1>NodeJS App — Homepage & Quick Docs</h1>
+        <p class="lead">Minimal, self-contained homepage for a Node.js application. Includes quick start, routes, environment and sample requests for development.</p>
+      </div>
+    </header>
+
+    <div class="grid" style="margin-top:18px">
+      <main class="card">
+        <section>
+          <h2>Quick Start</h2>
+          <p class="muted small">These steps assume you have Node.js installed (>=16).</p>
+          <pre><code>git clone &lt;repo-url&gt;
+cd &lt;repo&gt;
+npm install
+npm run dev   # or: node ./bin/www or node server.js</code></pre>
+        </section>
+
+        <section style="margin-top:14px">
+          <h2>Environment</h2>
+          <p class="small muted">Place runtime config in a .env file or set environment variables:</p>
+          <pre><code>PORT=3000
+NODE_ENV=development
+DATABASE_URL=mongodb://localhost:27017/mydb</code></pre>
+        </section>
+
+        <section style="margin-top:14px">
+          <h2>Server bootstrap (example)</h2>
+          <p class="small muted">A simple Express server entry point:</p>
+          <pre><code>// server.js
+const express = require('express');
+const app = express();
+app.use(express.json());
+
+app.get('/', (req, res) =&gt; res.send('Hello from NodeJS app'));
+app.get('/api/health', (req, res) =&gt; res.json({status: 'ok'}));
+
+const port = process.env.PORT || 3000;
+app.listen(port, () =&gt; console.log('Listening on', port));</code></pre>
+        </section>
+
+        <section style="margin-top:14px">
+          <h2>File structure (recommended)</h2>
+          <pre><code>/
+├─ package.json
+├─ server.js         # app entry
+├─ routes/
+│  ├─ index.js
+│  └─ users.js
+├─ controllers/
+├─ public/
+│  └─ home.html      # this file
+└─ README.md</code></pre>
+        </section>
+
+        <section style="margin-top:14px">
+          <h2>Contributing & Docs</h2>
+          <p class="small muted">Open an issue or PR in the project repository. Keep changes small and well-documented. Add tests for new endpoints.</p>
+          <p class="small">License: MIT (or your chosen license)</p>
+        </section>
+      </main>
+
+      <aside class="card">
+        <h2>API Reference (Common Routes)</h2>
+        <div class="routes" style="margin-top:8px">
+          <div class="route">
+            <div class="method GET">GET</div>
+            <div>
+              <div class="endpoint">/</div>
+              <div class="small muted">App home (HTML or welcome text)</div>
+            </div>
+          </div>
+
+          <div class="route">
+            <div class="method GET">GET</div>
+            <div>
+              <div class="endpoint">/api/health</div>
+              <div class="small muted">Health check — returns JSON { status: "ok" }</div>
+            </div>
+          </div>
+
+          <div class="route">
+            <div class="method GET">GET</div>
+            <div>
+              <div class="endpoint">/api/users</div>
+              <div class="small muted">List users (pagination optional)</div>
+            </div>
+          </div>
+
+          <div class="route">
+            <div class="method POST">POST</div>
+            <div>
+              <div class="endpoint">/api/users</div>
+              <div class="small muted">Create user — accepts JSON body</div>
+            </div>
+          </div>
+        </div>
+
+        <h2 style="margin-top:12px">Examples</h2>
+        <p class="small muted">curl and fetch examples.</p>
+        <pre id="curlExample"><code>curl -sS http://localhost:3000/api/health</code></pre>
+        <pre id="fetchExample"><code>fetch('/api/users', {
+  method: 'POST',
+  headers: {'Content-Type': 'application/json'},
+  body: JSON.stringify({name: 'Alice'})
+})</code></pre>
+
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="copy" data-target="curlExample">Copy curl</button>
+          <button class="copy" data-target="fetchExample">Copy fetch</button>
+        </div>
+      </aside>
+    </div>
+
+    <footer>
+      Quick docs generated for local development — modify as needed for production. Repo: <a href="#" target="_blank" rel="noopener">your-repo-url</a>
+    </footer>
+  </div>
+
+  <script>
+    // Small helper: copy code blocks
+    document.querySelectorAll('.copy').forEach(btn=>{
+      btn.addEventListener('click', async ()=> {
+        const id = btn.getAttribute('data-target');
+        const el = document.getElementById(id);
+        if(!el) return;
+        const text = el.innerText;
+        try {
+          await navigator.clipboard.writeText(text);
+          btn.textContent = 'Copied';
+          setTimeout(()=> btn.textContent = btn.getAttribute('data-target') === 'curlExample' ? 'Copy curl' : 'Copy fetch', 1200);
+        } catch(e) {
+          alert('Copy failed — select and copy manually.');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

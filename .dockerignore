@@ -1,0 +1,56 @@
+# Node modules (will be installed inside the container)
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local env files
+.env
+.env.*.local
+
+# Logs and runtime files
+logs
+*.log
+pids
+*.pid
+*.seed
+*.pid.lock
+*.gz
+
+# Coverage, test output and build artifacts
+coverage
+.nyc_output
+dist
+build
+tmp
+temp
+.cache
+
+# IDE / editor folders
+.vscode
+.idea
+*.sublime-workspace
+*.sublime-project
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Docker and CI
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# Package manager caches / archives
+*.tgz
+.yarn/*
+.pnp.*
+.pnpm-store
+
+# Misc
+coverage-reports
+reports

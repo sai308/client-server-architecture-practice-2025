@@ -1,0 +1,26 @@
+services:
+  app:
+    build:
+      context: .
+    image: node-app:latest
+    env_file: .env
+    networks:
+      - webnet
+
+  nginx:
+    image: nginx:stable-alpine
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./static:/usr/share/nginx/static:ro
+      - ./html:/usr/share/nginx/html:ro
+    networks:
+      - webnet
+
+networks:
+  webnet:
+    driver: bridge
