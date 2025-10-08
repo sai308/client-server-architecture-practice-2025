@@ -2,10 +2,10 @@
   "name": "client-server-architecture-practice-2025",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
+  "main": "./src/server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js",
+    "start": "node ./src/server.js",
     "dev": "nodemon --inspect=0.0.0.0:9229 ./src/server.js",
     "lint": "eslint ./src --fix",
     "format": "prettier --write ./src",
@@ -32,6 +32,10 @@
     "prettier": "3.6.2"
   },
   "dependencies": {
-    "dotenv": "17.2.2"
+    "@mgcrea/fastify-request-logger": "1.9.1",
+    "@mgcrea/pino-pretty-compact": "1.4.2",
+    "dotenv": "17.2.2",
+    "fastify": "5.6.1",
+    "pino-pretty": "13.1.1"
   }
 }
