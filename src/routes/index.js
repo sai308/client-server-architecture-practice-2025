@@ -1,4 +1,5 @@
 const { echoRoute } = require('./echo');
+const { resourcesRouter } = require('./resources');
 
 /**
  * Patch the routing of the fastify instance
@@ -7,6 +8,7 @@ const { echoRoute } = require('./echo');
 module.exports.patchRouting = (fastify) => {
   // Register routes
   fastify.register(echoRoute);
+  fastify.register(resourcesRouter);
 
   // // Handle 404 responses
   // fastify.setNotFoundHandler((request, reply) => {
@@ -16,6 +18,13 @@ module.exports.patchRouting = (fastify) => {
   // Add a global error handler if needed
   fastify.setErrorHandler((error, request, reply) => {
     fastify.log.error(error); // Log the error
+
+    if (error.validation) {
+      return reply
+        .status(error.statusCode || 400)
+        .send({ error: 'Invalid request', message: error.message });
+    }
+
     reply.status(500).send({ error: 'Internal Server Error' });
   });
 };

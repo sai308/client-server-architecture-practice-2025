@@ -54,7 +54,7 @@ class ResourceRepository {
   /**
    * Update a resource with the given ID using the provided data
    * @param {string} id
-   * @param {Repositories.ResourceShape | Repositories.ResourceInstance} data
+   * @param {Partial<Repositories.ResourceShape>} data
    * @returns {Promise<Repositories.ResourceInstance>}
    */
   async update(id, data) {
