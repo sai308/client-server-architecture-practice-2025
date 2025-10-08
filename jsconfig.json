@@ -1,0 +1,36 @@
+{
+  // JS project configuration for editor tooling (VS Code)
+  "compilerOptions": {
+    // language level targeted by tooling
+    "target": "ES2022",
+    // module format used by your runtime/bundler
+    "module": "commonjs",
+    // resolve modules like Node.js
+    "moduleResolution": "node",
+    // allow path aliasing relative to project root
+    "baseUrl": ".",
+    "paths": {
+      "@/ *": [
+        "src/*"
+      ]
+    },
+    // enable basic JS type checking in editor
+    "checkJs": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
+  },
+  "typeAcquisition": {
+    "enable": true
+  },
+  // files/folders to include in project intelligence
+  "include": [
+    "src/**/*",
+    "test/**/*",
+    "index.js"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build"
+  ]
+}
