@@ -1,3 +1,5 @@
+require('module-alias/register');
+
 const { env } = require('./config');
 
 // Import the bootstrapFastify function from app.js

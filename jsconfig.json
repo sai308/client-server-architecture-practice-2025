@@ -10,7 +10,7 @@
     // allow path aliasing relative to project root
     "baseUrl": ".",
     "paths": {
-      "@/ *": [
+      "@/*": [
         "src/*"
       ]
     },
