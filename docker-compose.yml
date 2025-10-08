@@ -6,6 +6,13 @@ services:
     env_file: .env
     networks:
       - webnet
+    ports:
+      #- '3000:3000' # Expose app port for direct access if needed
+      - '9229:9229' # Expose Node.js debugger port
+    volumes:
+      - ./:/srv/app
+    environment:
+      - NODE_ENV=development
 
   nginx:
     image: nginx:stable-alpine
@@ -13,7 +20,7 @@ services:
     depends_on:
       - app
     ports:
-      - "80:80"
+      - '80:80'
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
       - ./static:/usr/share/nginx/static:ro

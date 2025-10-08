@@ -4,7 +4,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Local env files
+# Local env files (already injected via docker-compose)
 .env
 .env.*.local
 
