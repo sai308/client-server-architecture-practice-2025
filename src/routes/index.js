@@ -1,5 +1,6 @@
 const { echoRoute } = require('./echo');
 const { resourcesRouter } = require('./resources');
+const { shopRouter } = require('./shop');
 
 /**
  * Patch the routing of the fastify instance
@@ -9,6 +10,7 @@ module.exports.patchRouting = (fastify) => {
   // Register routes
   fastify.register(echoRoute);
   fastify.register(resourcesRouter);
+  fastify.register(shopRouter);
 
   // // Handle 404 responses
   // fastify.setNotFoundHandler((request, reply) => {
