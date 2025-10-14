@@ -25,7 +25,7 @@ const bootstrapInfra = async () => {
 
     logger.info('Infrastructure initialized successfully.');
   } catch (error) {
-    logger.error('Failed to initialize infrastructure:', error);
+    logger.error(error, 'Failed to initialize infrastructure');
     throw error; // Exit the application if infra bootstrap fails
   }
 };
@@ -40,7 +40,7 @@ const shutdownInfra = async () => {
       logger.info('PostgreSQL connection closed.');
     }
   } catch (error) {
-    logger.error('Error during infrastructure shutdown:', error);
+    logger.error(error, 'Error during infrastructure shutdown');
   }
 };
 
