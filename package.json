@@ -9,7 +9,11 @@
     "dev": "nodemon --inspect=0.0.0.0:9229 ./src/server.js",
     "lint": "eslint ./src --fix",
     "format": "prettier --write ./src",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "pg:push": "drizzle-kit push",
+    "pg:pull": "drizzle-kit pull",
+    "pg:generate": "drizzle-kit generate",
+    "pg:migrate": "drizzle-kit migrate"
   },
   "repository": {
     "type": "git",
@@ -34,9 +38,13 @@
   "dependencies": {
     "@mgcrea/fastify-request-logger": "1.9.1",
     "@mgcrea/pino-pretty-compact": "1.4.2",
+    "@types/pg": "8.15.5",
     "dotenv": "17.2.2",
+    "drizzle-kit": "0.31.5",
+    "drizzle-orm": "0.44.6",
     "fastify": "5.6.1",
     "module-alias": "2.2.3",
+    "pg": "8.16.3",
     "pino-pretty": "13.1.1"
   },
   "_moduleAliases": {
