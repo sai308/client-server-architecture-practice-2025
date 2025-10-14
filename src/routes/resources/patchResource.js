@@ -21,7 +21,7 @@ module.exports = {
       },
       body: {
         type: 'object',
-        required: ['name', 'type'],
+        required: ['price', 'amount'],
         properties: {
           price: { type: 'number' },
           amount: { type: 'number' },
@@ -30,13 +30,15 @@ module.exports = {
     },
     handler: async (request, reply) => {
       try {
-        // @ts-ignore - We know that the params is defined
-        const targetId = request.params.id;
+        const { id } = /**
+         * @type {{ id: string }}
+         */ (request.params);
 
-        // @ts-ignore - We know that the body is defined in the schema
-        const { amount = 0, price = 0 } = request.body;
+        const { amount = 0, price = 0 } = /**
+         * @type {{amount?: number, price?: number}}
+         */ (request.body);
 
-        const patched = await resourceRepository.update(targetId, {
+        const patched = await resourceRepository.update(id, {
           amount,
           price,
         });

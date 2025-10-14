@@ -21,10 +21,11 @@ module.exports = {
     },
     handler: async (request, reply) => {
       try {
-        // @ts-ignore - We know that the params is defined
-        const targetId = request.params.id;
+        const { id } = /**
+         * @type {{ id: string }}
+         */ (request.params);
 
-        const deleted = await resourceRepository.delete(targetId);
+        const deleted = await resourceRepository.delete(id);
 
         return reply.code(200).send(deleted);
       } catch (error) {

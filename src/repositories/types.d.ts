@@ -13,8 +13,4 @@ declare namespace Repositories {
   };
 
   export type ResourceMap = Map<string, ResourceInstance>;
-
-  export type ReadByIdOrNot<I> = I extends string
-    ? ResourceInstance
-    : ResourceInstance[];
 }

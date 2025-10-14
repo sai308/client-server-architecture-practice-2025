@@ -1,54 +1,77 @@
-const { randomUUID } = require('node:crypto');
+const { $db, $schemas } = require('@/adapters/postgres');
+const { eq, or, ilike } = require('drizzle-orm');
 
 /**
  * @description A repository for managing resources
  */
 class ResourceRepository {
-  constructor() {
-    /**
-     * @type {Repositories.ResourceMap}
-     */
-    this.storage = new Map();
-  }
-
   /**
    * Create a new resource with the given data
    * @param {Repositories.ResourceShape} data
    * @returns {Promise<Repositories.ResourceInstance>}
    */
   async create(data) {
-    // Generate a random UUID for the new resource
-    const id = randomUUID();
-
     const syncedTimestamp = new Date();
 
-    // Store the new resource in the storage
-    this.storage.set(id, {
-      id,
-      ...data,
-      createdAt: syncedTimestamp,
-      updatedAt: syncedTimestamp,
-    });
+    // Insert the new resource into the database
+    const [newResource] = await $db
+      .insert($schemas.resources)
+      .values({
+        ...data,
+        amount: data.amount,
+        price: data.price,
+        createdAt: syncedTimestamp,
+        updatedAt: syncedTimestamp,
+      })
+      .returning();
 
-    // Return the newly created resource
-    return this.storage.get(id);
+    return newResource;
   }
 
   /**
-   * @template {string?} I
-   * Read a resource with the given ID or all resources if no ID is provided
-   * @param {I} [id]
+   * Find a resource with the given ID
+   * @param {string} [id]
+   * @returns {Promise<Repositories.ResourceInstance | null>}
    */
-  async read(id) {
-    // Check if the resource with the given ID exists
-    if (id && !this.storage.has(id)) {
+  async findById(id) {
+    if (!id) {
+      return null;
+    }
+
+    const [resource] = await $db
+      .select()
+      .from($schemas.resources)
+      .where(eq($schemas.resources.id, id));
+
+    if (!resource) {
       throw new Error('Resource not found');
     }
 
-    // Return the resource with the given ID or all resources
-    return /** @type {Repositories.ReadByIdOrNot<I>} */ (
-      id ? this.storage.get(id) : Array.from(this.storage.values())
-    );
+    return resource;
+  }
+
+  /**
+   * Read all resources from the database
+   * @param {string} search
+   * @param {number} [page=1]
+   * @param {number} [limit=10]
+   * @returns {Promise<Repositories.ResourceInstance[]>}
+   */
+  async findAll(search, page, limit = 25) {
+    const _limit = Math.max(50, limit);
+    const offset = (Math.max(1, page) - 1) * _limit;
+
+    return await $db
+      .select()
+      .from($schemas.resources)
+      .where(
+        or(
+          ilike($schemas.resources.name, `${search}%`),
+          ilike($schemas.resources.type, `${search}%`)
+        )
+      )
+      .offset(offset)
+      .limit(_limit);
   }
 
   /**
@@ -58,27 +81,23 @@ class ResourceRepository {
    * @returns {Promise<Repositories.ResourceInstance>}
    */
   async update(id, data) {
-    if (!this.storage.has(id)) {
+    const syncedTimestamp = new Date();
+
+    // Update the resource in the database
+    const [updatedResource] = await $db
+      .update($schemas.resources)
+      .set({
+        ...data,
+        updatedAt: syncedTimestamp,
+      })
+      .where(eq($schemas.resources.id, id))
+      .returning();
+
+    if (!updatedResource) {
       throw new Error('Resource not found');
     }
 
-    const updatedData = {
-      // Get the existing data
-      ...this.storage.get(id),
-      // and merge with the new data
-      ...data,
-      // Ensure the ID remains unchanged
-      id,
-    };
-
-    // Update the resource with the new data
-    this.storage.set(id, {
-      ...updatedData,
-      updatedAt: new Date(),
-    });
-
-    // Return the updated resource
-    return this.storage.get(id);
+    return updatedResource;
   }
 
   /**
@@ -87,17 +106,17 @@ class ResourceRepository {
    * @returns {Promise<Repositories.ResourceInstance>}
    */
   async delete(id) {
-    if (!this.storage.has(id)) {
+    // Delete the resource from the database
+    const [deletedResource] = await $db
+      .delete($schemas.resources)
+      .where(eq($schemas.resources.id, id))
+      .returning();
+
+    if (!deletedResource) {
       throw new Error('Resource not found');
     }
 
-    // Remove the resource from the storage
-    const resource = this.storage.get(id);
-
-    this.storage.delete(id);
-
-    // Return the deleted resource
-    return resource;
+    return deletedResource;
   }
 }
 

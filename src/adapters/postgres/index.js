@@ -13,7 +13,8 @@ const closeConnection = async () => {
 };
 
 module.exports = {
+  $schemas: require('./schemas'),
   closeConnection,
   testConnection,
-  db,
+  $db: db,
 };

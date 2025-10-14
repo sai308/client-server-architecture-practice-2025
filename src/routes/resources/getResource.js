@@ -21,10 +21,11 @@ module.exports = {
     },
     handler: async (request, reply) => {
       try {
-        // @ts-ignore - We know that the params is defined
-        const targetId = request.params.id;
+        const { id } = /**
+         * @type {{ id: string }}
+         */ (request.params);
 
-        const found = await resourceRepository.read(targetId);
+        const found = await resourceRepository.findById(id);
 
         if (!found) {
           return reply.code(404).send({

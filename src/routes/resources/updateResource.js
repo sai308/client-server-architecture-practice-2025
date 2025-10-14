@@ -32,11 +32,20 @@ module.exports = {
     },
     handler: async (request, reply) => {
       try {
-        // @ts-ignore - We know that the params is defined
-        const targetId = request.params.id;
+        const params = /**
+         * @type {{ id: string }}
+         */ (request.params);
 
-        // @ts-ignore - We know that the body is defined in the schema
-        const { name, type, amount = 0, price = 0 } = request.body;
+        const targetId = params.id;
+
+        const {
+          name,
+          type,
+          amount = 0,
+          price = 0,
+        } = /**
+         * @type {{ name: string, type: string, amount?: number, price?: number }}
+         */ (request.body);
 
         const updated = await resourceRepository.update(targetId, {
           name,
