@@ -5,7 +5,7 @@ services:
     image: node-app:latest
     env_file: .env
     networks:
-      - webnet
+      - web_net
     ports:
       #- '3000:3000' # Expose app port for direct access if needed
       - '9229:9229' # Expose Node.js debugger port
@@ -26,8 +26,41 @@ services:
       - ./static:/usr/share/nginx/static:ro
       - ./html:/usr/share/nginx/html:ro
     networks:
-      - webnet
+      - web_net
+
+  postgres:
+    image: postgres:latest
+    networks:
+      - postgres_sub_net
+    ports:
+      #   - "5432:5432"    # PostgreSQL port
+      - ${DEV_POSTGRES_PORT:-}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+
+  mongo:
+    image: mongo:latest
+    networks:
+      - mongo-sub_net
+    ports:
+      #   - "27017:27017"  # MongoDB port
+      - ${DEV_MONGO_PORT:-}
+    volumes:
+      - mongo-data:/data/db
 
 networks:
-  webnet:
+  web_net:
     driver: bridge
+  mongo-sub_net:
+    driver: bridge
+
+postgres_sub_net:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  mongo-data:
