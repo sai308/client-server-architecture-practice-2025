@@ -1,9 +1,11 @@
 require('module-alias/register');
 
-const { env } = require('./config');
+const { env } = require('@/config');
 
 // Import the bootstrapFastify function from app.js
-const { bootstrapFastify } = require('./app');
+const { bootstrapFastify } = require('@/app');
+
+const infra = require('@/infra');
 
 // Declare a variable to hold the Fastify instance
 let fastify;
@@ -13,6 +15,8 @@ let fastify;
  */
 const startServer = async () => {
   try {
+    await infra.bootstrapInfra();
+
     // Initialize Fastify by calling bootstrapFastify
     fastify = bootstrapFastify();
 
@@ -29,6 +33,10 @@ const startServer = async () => {
       // Fallback to console logging if Fastify isn't initialized
       console.error('Error starting server:', err);
     }
+
+    // ensure infrastructure is shut down properly
+    await infra.shutdownInfra();
+
     // Exit the process with a failure code
     process.exit(1);
   }
@@ -40,19 +48,34 @@ const startServer = async () => {
  */
 const shutdown = async (signal) => {
   console.log(`Received ${signal}. Shutting down gracefully...`);
-  if (fastify) {
-    try {
-      // Close the Fastify server
-      await fastify.close();
-      console.log('Fastify server closed.');
-      process.exit(0);
-    } catch (err) {
-      console.error('Error during shutdown:', err);
-      process.exit(1);
+
+  let shutdownFailed = false;
+
+  try {
+    if (fastify) {
+      try {
+        // Close the Fastify server
+        await fastify.close();
+
+        console.log('Fastify server closed.');
+      } catch (err) {
+        console.error('Error during app shutdown:', err);
+        shutdownFailed = true;
+      }
     }
-  } else {
-    // If Fastify isn't initialized, exit immediately
-    process.exit(0);
+
+    // Shutdown infrastructure components
+    await infra.shutdownInfra();
+  } catch (err) {
+    console.error('Error during infrastructure shutdown:', err);
+    shutdownFailed = true;
+  } finally {
+    if (shutdownFailed) {
+      process.exit(1); // Exit with failure code if any shutdown step failed
+    } else {
+      console.log('Shutdown complete. Exiting process.');
+      process.exit(0); // Exit with success code
+    }
   }
 };
 
