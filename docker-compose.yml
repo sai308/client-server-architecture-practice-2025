@@ -6,6 +6,9 @@ services:
     env_file: .env
     networks:
       - web_net
+      - postgres_subnet
+    depends_on:
+      - postgres
     ports:
       #- '3000:3000' # Expose app port for direct access if needed
       - '9229:9229' # Expose Node.js debugger port
@@ -13,6 +16,7 @@ services:
       - ./:/srv/app
     environment:
       - NODE_ENV=development
+      - PG_DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
 
   nginx:
     image: nginx:stable-alpine

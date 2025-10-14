@@ -2,7 +2,7 @@ const { logger } = require('./logger');
 
 /**
  * A map to hold initialized infrastructure components.
- * @type {Map<string, {testConnection: Function, closeConnection: Function, db: any}>}
+ * @type {Map<string, {testConnection: Function, closeConnection: Function, $db: any}>}
  */
 const infrastructureMap = new Map();
 
