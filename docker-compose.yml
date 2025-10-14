@@ -31,7 +31,7 @@ services:
   postgres:
     image: postgres:latest
     networks:
-      - postgres_sub_net
+      - postgres_subnet
     ports:
       #   - "5432:5432"    # PostgreSQL port
       - ${DEV_POSTGRES_PORT:-}
@@ -45,7 +45,7 @@ services:
   mongo:
     image: mongo:latest
     networks:
-      - mongo-sub_net
+      - mongo_subnet
     ports:
       #   - "27017:27017"  # MongoDB port
       - ${DEV_MONGO_PORT:-}
@@ -55,10 +55,10 @@ services:
 networks:
   web_net:
     driver: bridge
-  mongo-sub_net:
+  mongo_subnet:
     driver: bridge
 
-postgres_sub_net:
+  postgres_subnet:
     driver: bridge
 
 volumes:
