@@ -7,8 +7,10 @@ services:
     networks:
       - web_net
       - postgres_subnet
+      - mongo_subnet
     depends_on:
       - postgres
+      - mongo
     ports:
       #- '3000:3000' # Expose app port for direct access if needed
       - '9229:9229' # Expose Node.js debugger port
@@ -17,6 +19,7 @@ services:
     environment:
       - NODE_ENV=development
       - PG_DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - MONGO_DATABASE_URL=mongodb://mongo:27017
 
   nginx:
     image: nginx:stable-alpine

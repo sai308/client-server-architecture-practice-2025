@@ -12,20 +12,32 @@ const infrastructureMap = new Map();
  */
 const bootstrapInfra = async () => {
   try {
-    logger.info('Initializing infrastructure...');
+    logger.info('🚀 Initializing infrastructure...');
 
     // Test PostgreSQL connection
-    logger.info('Testing PostgreSQL connection...');
+    logger.info('🐘 Testing PostgreSQL connection...');
     const pgAdapter = require('./adapters/postgres');
     await pgAdapter.testConnection();
 
-    logger.info('PostgreSQL connection established.');
-    // Add other infrastructure components here if needed
-    // Example: Redis, MongoDB, etc.
+    infrastructureMap.set('postgres', pgAdapter);
 
-    logger.info('Infrastructure initialized successfully.');
+    logger.info('✅ PostgreSQL connection established.');
+
+    // Test MongoDB connection
+    logger.info('🌱 Testing MongoDB connection...');
+    const mongoAdapter = require('./adapters/mongo');
+    await mongoAdapter.testConnection();
+
+    infrastructureMap.set('mongo', mongoAdapter);
+
+    logger.info('✅ MongoDB connection established.');
+
+    // Add other infrastructure components here if needed
+    // Example: Redis, etc.
+
+    logger.info('🎉 Infrastructure initialized successfully.');
   } catch (error) {
-    logger.error(error, 'Failed to initialize infrastructure');
+    logger.error(error, '💢 Failed to initialize infrastructure');
     throw error; // Exit the application if infra bootstrap fails
   }
 };
@@ -38,6 +50,12 @@ const shutdownInfra = async () => {
     if (infrastructureMap.has('postgres')) {
       await infrastructureMap.get('postgres').closeConnection();
       logger.info('PostgreSQL connection closed.');
+    }
+
+    // Close MongoDB connection
+    if (infrastructureMap.has('mongo')) {
+      await infrastructureMap.get('mongo').closeConnection();
+      logger.info('MongoDB connection closed.');
     }
   } catch (error) {
     logger.error(error, 'Error during infrastructure shutdown');
