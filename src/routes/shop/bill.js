@@ -7,7 +7,7 @@ module.exports = {
   /**
    * @type {import('fastify').RouteOptions}
    */
-  purchaseResources: {
+  getPurchaseBill: {
     url: '/shop/bill',
     method: 'GET',
     schema: {
