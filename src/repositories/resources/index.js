@@ -1,25 +1,23 @@
 const { $db, $schemas } = require('@/adapters/postgres');
-const { eq, or, ilike } = require('drizzle-orm');
+const { eq, or, ilike, inArray } = require('drizzle-orm');
 
 /**
  * @description A repository for managing resources
+ * @implements {Repositories.ResourcesRepository}
  */
-class ResourceRepository {
+class ResourcesRepository {
   /**
    * Create a new resource with the given data
-   * @param {Repositories.ResourceShape} data
-   * @returns {Promise<Repositories.ResourceInstance>}
+   * @type {Repositories.ResourcesRepository['create']}
    */
-  async create(data) {
+  async create(resourceData) {
     const syncedTimestamp = new Date();
 
     // Insert the new resource into the database
     const [newResource] = await $db
       .insert($schemas.resources)
       .values({
-        ...data,
-        amount: data.amount,
-        price: data.price,
+        ...resourceData,
         createdAt: syncedTimestamp,
         updatedAt: syncedTimestamp,
       })
@@ -30,8 +28,7 @@ class ResourceRepository {
 
   /**
    * Find a resource with the given ID
-   * @param {string} [id]
-   * @returns {Promise<Repositories.ResourceInstance | null>}
+   * @type {Repositories.ResourcesRepository['findById']}
    */
   async findById(id) {
     if (!id) {
@@ -51,43 +48,57 @@ class ResourceRepository {
   }
 
   /**
+   * Find a resource with the given ID
+   * @type {Repositories.ResourcesRepository['findByIds']}
+   */
+  async findByIds(ids) {
+    if (!ids?.length) {
+      return [];
+    }
+
+    const resources = await $db
+      .select()
+      .from($schemas.resources)
+      .where(inArray($schemas.resources.id, ids));
+
+    return resources;
+  }
+
+  /**
    * Read all resources from the database
-   * @param {string} search
-   * @param {number} [page=1]
-   * @param {number} [limit=10]
-   * @returns {Promise<Repositories.ResourceInstance[]>}
+   * @type {Repositories.ResourcesRepository['findAll']}
    */
   async findAll(search, page, limit = 25) {
     const _limit = Math.max(50, limit);
     const offset = (Math.max(1, page) - 1) * _limit;
 
-    return await $db
-      .select()
-      .from($schemas.resources)
-      .where(
-        or(
+    const condition = search
+      ? or(
           ilike($schemas.resources.name, `${search}%`),
           ilike($schemas.resources.type, `${search}%`)
         )
-      )
+      : undefined;
+
+    return await $db
+      .select()
+      .from($schemas.resources)
+      .where(condition)
       .offset(offset)
       .limit(_limit);
   }
 
   /**
    * Update a resource with the given ID using the provided data
-   * @param {string} id
-   * @param {Partial<Repositories.ResourceShape>} data
-   * @returns {Promise<Repositories.ResourceInstance>}
+   * @type {Repositories.ResourcesRepository['update']}
    */
-  async update(id, data) {
+  async update(id, resourceData) {
     const syncedTimestamp = new Date();
 
     // Update the resource in the database
     const [updatedResource] = await $db
       .update($schemas.resources)
       .set({
-        ...data,
+        ...resourceData,
         updatedAt: syncedTimestamp,
       })
       .where(eq($schemas.resources.id, id))
@@ -101,9 +112,34 @@ class ResourceRepository {
   }
 
   /**
+   * @type {Repositories.ResourcesRepository['save']}
+   */
+  async save(record) {
+    // Remove id to avoid conflicts during creation
+    const { id, ...safeRecord } = record;
+
+    const remoteRecord = await this.findById(id);
+
+    return remoteRecord ? this.update(id, safeRecord) : this.create(safeRecord);
+  }
+
+  /**
+   * @type {Repositories.ResourcesRepository['materialize']}
+   */
+  async materialize(entity) {
+    const record = await this.create({
+      name: entity.name,
+      type: entity.type,
+      amount: entity.amount,
+      price: entity.price,
+    });
+
+    return record;
+  }
+
+  /**
    * Delete a resource with the given ID
-   * @param {string} id
-   * @returns {Promise<Repositories.ResourceInstance>}
+   * @type {Repositories.ResourcesRepository['delete']}
    */
   async delete(id) {
     // Delete the resource from the database
@@ -118,6 +154,13 @@ class ResourceRepository {
 
     return deletedResource;
   }
+
+  /**
+   * @type {Repositories.ResourcesRepository['toMapped']}
+   */
+  toMapped(resources) {
+    return new Map(resources.map((res) => [res.id, res]));
+  }
 }
 
-module.exports.resourceRepository = new ResourceRepository();
+module.exports.resourcesRepository = new ResourcesRepository();

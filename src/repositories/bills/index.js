@@ -6,30 +6,34 @@ const { ObjectId } = require('mongodb');
  * @implements {Repositories.BillsRepository}
  */
 class BillsRepository {
+  #db;
+
+  constructor() {
+    this.#db = $cols.bills();
+  }
+
   /**
    * Create a new bill
-   * @param {Omit<Repositories.Bill, '_id' | 'createdAt' | 'updatedAt'>} billData - The data for the new bill
-   * @returns {Promise<Repositories.Bill>} The created bill
+   * @type {Repositories.BillsRepository['create']}
    */
   async create(billData) {
     const createdAt = new Date();
-    const result = await $cols.bills().insertOne({ ...billData, createdAt });
+    const result = await this.#db.insertOne({ ...billData, createdAt });
     return { _id: result.insertedId.toString(), ...billData, createdAt };
   }
 
   /**
    * Find a bill by its ID
-   * @param {string} id - The string ID of the bill
-   * @returns {Promise<Repositories.Bill | null>} The bill if found, or null
+   * @type {Repositories.BillsRepository['findById']}
    */
   async findById(id) {
-    const bill = await $cols.bills().findOne({ _id: new ObjectId(id) });
+    const bill = await this.#db.findOne({ _id: new ObjectId(id) });
 
     if (!bill) return null;
 
     // Dirty type casting to support d.ts types
     const _bill = /**
-     * @type {Repositories.Bill|null}
+     * @type {Repositories.BillDocument|null}
      */ ({ ...bill, _id: bill._id.toString() });
 
     return _bill;
@@ -37,15 +41,14 @@ class BillsRepository {
 
   /**
    * Get all bills with optional filters
-   * @param {Repositories.BillFilter} [filter={}] - The filter criteria
-   * @returns {Promise<Repositories.Bill[]>} The list of bills
+   * @type {Repositories.BillsRepository['findAll']}
    */
   async findAll(filter = {}) {
-    const bills = await $cols.bills().find(filter).toArray();
+    const bills = await this.#db.find(filter).toArray();
 
     // Dirty type casting to support d.ts types
     const _bills = /**
-     * @type {Repositories.Bill[]}
+     * @type {Repositories.BillDocument[]}
      */ (bills.map((bill) => ({ ...bill, _id: bill._id.toString() })));
 
     return _bills;
@@ -53,9 +56,7 @@ class BillsRepository {
 
   /**
    * Update a bill by its ID
-   * @param {string} id - The string ID of the bill
-   * @param {Partial<Omit<Repositories.Bill, '_id' | 'createdAt'>>} updateData - The data to update
-   * @returns {Promise<Repositories.Bill | null>} The updated bill if found, or null
+   * @type {Repositories.BillsRepository['update']}
    */
   async update(id, updateData) {
     const result = await $cols
@@ -74,9 +75,33 @@ class BillsRepository {
   }
 
   /**
+   * @type {Repositories.BillsRepository['save']}
+   */
+  async save(document) {
+    const { _id, ...safeDocument } = document;
+    const remoteDocument = await this.findById(_id);
+
+    return remoteDocument
+      ? this.update(_id, safeDocument)
+      : this.create(safeDocument);
+  }
+
+  /**
+   * @type {Repositories.BillsRepository['materialize']}
+   */
+  async materialize(entity) {
+    const document = await this.create({
+      customerId: entity.customerId,
+      total: entity.total,
+      items: entity.items,
+    });
+
+    return document;
+  }
+
+  /**
    * Delete a bill by its ID
-   * @param {string} id - The string ID of the bill
-   * @returns {Promise<Repositories.Bill | null>} The deleted bill if found, or null
+   * @type {Repositories.BillsRepository['delete']}
    */
   async delete(id) {
     const result = await $cols

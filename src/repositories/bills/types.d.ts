@@ -1,29 +1,18 @@
 declare namespace Repositories {
-  /**
-   * Represents a bill in the system.
-   */
-  export interface Bill {
+  export type BillDocument = Domain.Bill & {
     _id: string; // The unique ID of the bill (as a string, not ObjectId)
-    customerName: string; // The name of the customer
-    total: number; // The total amount of the bill
-    items: Array<{
-      resourceId: string; // Id of the item
-      name: string; // Name of the item
-      quantity: number; // Quantity of the item
-      price: number; // Price per unit of the item
-    }>; // List of items in the bill
     createdAt: Date; // The creation date of the bill
     updatedAt?: Date; // The last updated date of the bill (optional)
-  }
+  };
 
   /**
    * Filter criteria for finding bills.
    */
-  export interface BillFilter {
+  export type BillFilter = {
     customerName?: string; // Filter by customer name
     total?: number; // Filter by amount
     [key: string]: any; // Additional filter fields
-  }
+  };
 
   /**
    * Repository for managing bills in MongoDB.
@@ -34,23 +23,21 @@ declare namespace Repositories {
      * @param billData - The data for the new bill.
      * @returns A promise that resolves to the created bill.
      */
-    create(
-      billData: Omit<Bill, '_id' | 'createdAt' | 'updatedAt'>
-    ): Promise<Bill>;
+    create(billData: Domain.Bill): Promise<BillDocument>;
 
     /**
      * Find a bill by its ID.
      * @param id - The string ID of the bill.
      * @returns A promise that resolves to the bill if found, or null.
      */
-    findById(id: string): Promise<Bill | null>;
+    findById(id: string): Promise<BillDocument | null>;
 
     /**
      * Get all bills with optional filters.
      * @param filter - The filter criteria.
      * @returns A promise that resolves to the list of bills.
      */
-    findAll(filter?: BillFilter): Promise<Bill[]>;
+    findAll(filter?: BillFilter): Promise<BillDocument[]>;
 
     /**
      * Update a bill by its ID.
@@ -60,14 +47,28 @@ declare namespace Repositories {
      */
     update(
       id: string,
-      updateData: Partial<Omit<Bill, '_id' | 'createdAt'>>
+      updateData: Partial<Omit<BillDocument, '_id' | 'createdAt'>>
     ): Promise<Bill | null>;
+
+    /**
+     * Save a bill document.
+     * @param bill - The bill document to save.
+     * @returns A promise that resolves to the saved bill document.
+     */
+    save(document: Domain.Bill & { _id: string }): Promise<BillDocument>;
+
+    /**
+     * Materialize a bill entity into a bill record.
+     * @param entity - The bill entity to materialize.
+     * @returns A promise that resolves to the materialized bill.
+     */
+    materialize(entity: Domain.BillEntity): Promise<BillDocument>;
 
     /**
      * Delete a bill by its ID.
      * @param id - The string ID of the bill.
      * @returns A promise that resolves to the deleted bill if found, or null.
      */
-    delete(id: string): Promise<Bill | null>;
+    delete(id: string): Promise<BillDocument | null>;
   }
 }
