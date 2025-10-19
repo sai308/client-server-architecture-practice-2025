@@ -12,6 +12,11 @@ module.exports.patchRouting = (fastify) => {
   fastify.register(resourcesRouter);
   fastify.register(shopRouter);
 
+  // Docs
+  fastify.get('/openapi.json', async (request, reply) => {
+    return fastify.swagger();
+  });
+
   // // Handle 404 responses
   // fastify.setNotFoundHandler((request, reply) => {
   //   reply.status(404).send({ error: 'Not Found' });
@@ -24,7 +29,7 @@ module.exports.patchRouting = (fastify) => {
     if (error.validation) {
       return reply
         .status(error.statusCode || 400)
-        .send({ error: 'Invalid request', message: error.message });
+        .send({ error: `Invalid request: ${error.message}` });
     }
 
     reply.status(500).send({ error: 'Internal Server Error' });

@@ -18,7 +18,7 @@ const startServer = async () => {
     await infra.bootstrapInfra();
 
     // Initialize Fastify by calling bootstrapFastify
-    fastify = bootstrapFastify();
+    fastify = await bootstrapFastify();
 
     // Start listening on the specified port and host
     await fastify.listen({

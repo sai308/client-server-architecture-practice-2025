@@ -30,6 +30,7 @@ services:
       - '80:80'
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/secrets/.htpasswd:/etc/nginx/.htpasswd:ro # https://hostingcanada.org/htpasswd-generator/
       - ./static:/usr/share/nginx/static:ro
       - ./html:/usr/share/nginx/html:ro
     networks:
