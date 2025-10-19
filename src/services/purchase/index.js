@@ -1,21 +1,19 @@
-const { resourceRepository } = require('@/repositories/resources');
-const { billsRepository } = require('@/repositories/bills');
+const { Bill } = require('@/domains/bill');
 
+/**
+ * @implements {Services.PurchaseService}
+ */
 class PurchaseService {
   /**
-   * Purchase resources and create a bill.
-   * @param {Services.Purchase.OrderItem[]} order - The list of resources to purchase.
-   * @param {string} customerName - The name of the customer.
-   * @returns {Promise<Repositories.Bill>} The created bill.
-   * @throws {Error} If any resource is unavailable or exhausted.
+   * @type {Services.PurchaseService['purchaseResources']}
    */
-  async purchaseResources(order, customerName) {
-    const billItems = [];
-    let totalAmount = 0;
+  purchaseResources(order, customer, resourcesMap) {
+    const bill = new Bill({
+      customerId: customer.id,
+    });
 
-    // Check availability for all resources in the order
-    for (const { id, amount } of order) {
-      const resource = await resourceRepository.findById(id);
+    for (const { id, amount } of order.items) {
+      const resource = resourcesMap.get(id);
 
       if (!resource) {
         throw new Error(`Resource with ID ${id} not found.`);
@@ -27,62 +25,46 @@ class PurchaseService {
         );
       }
 
-      // Add to bill items
-      billItems.push({
+      bill.addItem({
         resourceId: resource.id,
         name: resource.name,
         quantity: amount,
         price: resource.price,
       });
 
-      totalAmount += resource.price * amount;
+      resource.amount = resource.amount - amount;
     }
 
-    // Update resource amounts in the database
-    for (const { id, amount } of order) {
-      const resource = await resourceRepository.findById(id);
-      await resourceRepository.update(id, {
-        amount: resource.amount - amount,
-      });
-    }
+    customer.updateBalance(-bill.total);
 
-    // Create a bill
-    const bill = await billsRepository.create({
-      customerName,
-      total: totalAmount,
-      items: billItems,
-    });
-
-    return bill;
+    return {
+      bill,
+      updatedCustomer: customer,
+      updatedResources: Array.from(resourcesMap.values()),
+    };
   }
 
   /**
-   * Refund a bill and restore resource amounts.
-   * @param {string} billId - The ID of the bill to refund.
-   * @returns {Promise<Repositories.Bill>} The refunded bill.
-   * @throws {Error} If the bill is not found.
+   * @type {Services.PurchaseService['refundByBill']}
    */
-  async refundByBill(billId) {
-    const bill = await billsRepository.findById(billId);
-
-    if (!bill) {
-      throw new Error(`Bill with ID ${billId} not found.`);
-    }
-
+  refundByBill(bill, customer, resourcesMap) {
     // Restore resource amounts
     for (const item of bill.items) {
-      const resource = await resourceRepository.findById(item.resourceId);
+      const resource = resourcesMap.get(item.resourceId);
 
       if (!resource) {
         throw new Error(`Resource with ID ${item.resourceId} not found.`);
       }
 
-      await resourceRepository.update(resource.id, {
-        amount: resource.amount + item.quantity,
-      });
+      resource.amount = resource.amount + item.quantity;
     }
 
-    return bill;
+    customer.updateBalance(+bill.total);
+
+    return {
+      updatedCustomer: customer,
+      updatedResources: Array.from(resourcesMap.values()),
+    };
   }
 }
 

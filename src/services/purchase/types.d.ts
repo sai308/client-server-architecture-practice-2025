@@ -1,29 +1,37 @@
 declare namespace Services {
-  namespace Purchase {
-    /**
-     * Represents an item in the purchase order.
-     */
-    export interface OrderItem {
-      id: string; // The ID of the resource
-      amount: number; // The quantity to purchase
-    }
+  type ResourceMap = ReturnType<
+    Repositories.ResourcesRepositoryStatic['toMapped']
+  >;
 
+  interface PurchaseService {
     /**
-     * Represents an item in the bill.
+     * Purchase resources and create a bill.
      */
-    export interface BillItem {
-      resourceId: string; // The ID of the resource
-      name: string; // The name of the resource
-      quantity: number; // The quantity purchased
-      price: number; // The price per unit
-    }
-
+    purchaseResources<
+      Order extends Domain.Purchase.OrderEntity,
+      Customer extends Domain.UserEntity,
+    >(
+      order: Order,
+      customer: Customer,
+      resourcesMap: ResourceMap
+    ): {
+      bill: Domain.BillEntity;
+      updatedCustomer: Customer;
+      updatedResources: Repositories.ResourceRecord[];
+    };
     /**
-     * Represents the input for the `purchaseResources` method.
+     * Refund a bill and restore resource amounts.
      */
-    export interface Input {
-      order: OrderItem[]; // The list of resources to purchase
-      customerName: string; // The name of the customer
-    }
+    refundByBill<
+      Bill extends Domain.BillEntity,
+      Customer extends Domain.UserEntity,
+    >(
+      bill: Bill,
+      customer: Customer,
+      resourcesMap: ResourceMap
+    ): {
+      updatedCustomer: Customer;
+      updatedResources: Repositories.ResourceRecord[];
+    };
   }
 }
