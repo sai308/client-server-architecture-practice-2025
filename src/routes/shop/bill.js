@@ -19,7 +19,6 @@ module.exports = {
           id: {
             type: 'string',
             pattern: '^[0-9a-fA-F]{24}$',
-            example: '60d5ec49f1d2c916c4a4d3b2',
           },
         },
         required: ['id'],
@@ -28,25 +27,22 @@ module.exports = {
         201: {
           type: 'object',
           properties: {
-            type: 'object',
-            properties: {
-              _id: { type: 'string' },
-              customerId: { type: 'number' },
-              total: { type: 'number' },
+            _id: { type: 'string' },
+            customerId: { type: 'number' },
+            total: { type: 'number' },
+            items: {
+              type: 'array',
               items: {
-                type: 'array',
-                items: {
-                  type: 'object',
-                  properties: {
-                    resourceId: { type: 'string' },
-                    name: { type: 'string' },
-                    quantity: { type: 'number' },
-                    price: { type: 'number' },
-                  },
+                type: 'object',
+                properties: {
+                  resourceId: { type: 'string' },
+                  name: { type: 'string' },
+                  quantity: { type: 'number' },
+                  price: { type: 'number' },
                 },
               },
-              createdAt: { type: 'string', format: 'date-time' },
             },
+            createdAt: { type: 'string', format: 'date-time' },
           },
         },
         400: { type: 'object', properties: { error: { type: 'string' } } },
