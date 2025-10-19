@@ -40,7 +40,6 @@
     "@fastify/swagger": "9.5.2",
     "@mgcrea/fastify-request-logger": "1.9.1",
     "@mgcrea/pino-pretty-compact": "1.4.2",
-    "@scalar/fastify-api-reference": "1.38.1",
     "@types/pg": "8.15.5",
     "dotenv": "17.2.2",
     "drizzle-kit": "0.31.5",

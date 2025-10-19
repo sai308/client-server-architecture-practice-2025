@@ -69,7 +69,7 @@ class ResourcesRepository {
    * @type {Repositories.ResourcesRepository['findAll']}
    */
   async findAll(search, page, limit = 25) {
-    const _limit = Math.max(50, limit);
+    const _limit = Math.min(50, limit);
     const offset = (Math.max(1, page) - 1) * _limit;
 
     const condition = search

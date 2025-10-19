@@ -1,7 +1,5 @@
 declare namespace Services {
-  type ResourceMap = ReturnType<
-    Repositories.ResourcesRepositoryStatic['toMapped']
-  >;
+  type ResourceMap = ReturnType<Repositories.ResourcesRepository['toMapped']>;
 
   interface PurchaseService {
     /**

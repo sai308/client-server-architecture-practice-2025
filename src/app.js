@@ -1,6 +1,5 @@
 const Fastify = require('fastify');
 const swagger = require('@fastify/swagger');
-const scalar = require('@scalar/fastify-api-reference').default;
 
 const { env } = require('@/config');
 const { logger } = require('@/logger');
@@ -41,15 +40,6 @@ const bootstrapFastify = async () => {
       //     },
       //   },
       // },
-    },
-  });
-
-  await fastify.register(scalar, {
-    routePrefix: '/reference',
-    configuration: {
-      pathRouting: { basePath: '/api/reference' },
-      // make the UI fetch the spec explicitly
-      url: '/api/openapi.json',
     },
   });
 

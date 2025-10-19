@@ -60,15 +60,17 @@ class UsersRepository {
     const _limit = Math.min(50, limit);
     const offset = (Math.max(1, page) - 1) * _limit;
 
+    const condition = search
+      ? or(
+          ilike($schemas.users.name, `${search}%`),
+          ilike($schemas.users.email, `%${search}%`)
+        )
+      : undefined;
+
     return await $db
       .select()
       .from($schemas.users)
-      .where(
-        or(
-          ilike($schemas.users.name, `%${search}%`),
-          ilike($schemas.users.email, `%${search}%`)
-        )
-      )
+      .where(condition)
       .offset(offset)
       .limit(_limit);
   }

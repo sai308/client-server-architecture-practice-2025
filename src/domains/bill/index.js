@@ -21,7 +21,7 @@ class Bill {
     this._id = _id?.toString();
     this.customerId = customerId;
     this.total = total;
-    this.items = items;
+    this.items = items.map((item) => new BillItem(item));
   }
 
   /**
