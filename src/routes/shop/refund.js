@@ -1,4 +1,4 @@
-const { purchaseService } = require('@/services/purchase');
+const { executeRefund } = require('@/useCases/refundPurchase');
 
 /**
  * @description Route to refund purchase by bill.
@@ -11,6 +11,8 @@ module.exports = {
     url: '/shop/refund',
     method: 'POST',
     schema: {
+      description: 'Refund purchase by bill',
+      tags: ['shop'],
       body: {
         type: 'object',
         required: ['billId'],
@@ -22,22 +24,39 @@ module.exports = {
         200: {
           type: 'object',
           properties: {
-            _id: { type: 'string' },
-            customerName: { type: 'string' },
-            amount: { type: 'number' },
-            items: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  resourceId: { type: 'string' },
-                  name: { type: 'string' },
-                  quantity: { type: 'number' },
-                  price: { type: 'number' },
+            refundedBill: {
+              type: 'object',
+              properties: {
+                _id: { type: 'string' },
+                customerId: { type: 'number' },
+                total: { type: 'number' },
+                items: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      resourceId: { type: 'string' },
+                      name: { type: 'string' },
+                      quantity: { type: 'number' },
+                      price: { type: 'number' },
+                    },
+                  },
                 },
+                createdAt: { type: 'string', format: 'date-time' },
               },
             },
-            createdAt: { type: 'string', format: 'date-time' },
+            user: {
+              type: 'object',
+              properties: {
+                id: { type: 'number' },
+                name: { type: 'string' },
+                age: { type: 'number' },
+                email: { type: 'string' },
+                balance: { type: 'number' },
+                createdAt: { type: 'string', format: 'date-time' },
+                updatedAt: { type: 'string', format: 'date-time' },
+              },
+            },
           },
         },
         400: { type: 'object', properties: { error: { type: 'string' } } },
@@ -52,12 +71,22 @@ module.exports = {
            */
           (request.body);
 
-        const bill = await purchaseService.refundByBill(billId);
+        const opRes = await executeRefund(billId);
 
-        return reply.code(200).send(bill);
+        return reply.code(200).send(opRes);
       } catch (error) {
+        if (error.cause) {
+          request.log.debug(
+            error.cause,
+            'Request handling was interrupted by the handled error'
+          );
+        }
+
         request.log.error(error);
-        return reply.code(400).send({ error: error.message });
+
+        return reply
+          .code('cause' in error ? 400 : 500)
+          .send({ error: error.message });
       }
     },
   },

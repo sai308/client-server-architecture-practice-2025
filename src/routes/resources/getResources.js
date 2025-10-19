@@ -1,4 +1,4 @@
-const { resourceRepository } = require('@/repositories/resources');
+const { resourcesRepository } = require('@/repositories/resources');
 
 /**
  * @description Route to fetch all resources.
@@ -11,6 +11,8 @@ module.exports = {
     url: '/resources',
     method: 'GET',
     schema: {
+      description: 'Fetch all resources with optional search and pagination',
+      tags: ['resources'],
       querystring: {
         type: 'object',
         properties: {
@@ -19,6 +21,25 @@ module.exports = {
           limit: { type: 'number', minimum: 1, maximum: 50, default: 25 },
         },
       },
+      response: {
+        200: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              id: { type: 'string', format: 'uuid' },
+              name: { type: 'string' },
+              type: { type: 'string' },
+              price: { type: 'number', minimum: 0 },
+              amount: { type: 'number', minimum: 0 },
+              createdAt: { type: 'string', format: 'date-time' },
+              updatedAt: { type: 'string', format: 'date-time' },
+            },
+          },
+        },
+        400: { type: 'object', properties: { error: { type: 'string' } } },
+        500: { type: 'object', properties: { error: { type: 'string' } } },
+      },
     },
     handler: async (request, reply) => {
       try {
@@ -26,7 +47,7 @@ module.exports = {
          * @type {{ search?: string, page?: number, limit?: number }}
          */ (request.query);
 
-        const list = await resourceRepository.findAll(search, page, limit);
+        const list = await resourcesRepository.findAll(search, page, limit);
 
         return reply.code(200).send(list);
       } catch (error) {

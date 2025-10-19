@@ -1,4 +1,4 @@
-const { resourceRepository } = require('@/repositories/resources');
+const { resourcesRepository } = require('@/repositories/resources');
 
 /**
  * @description Route to partially update a resource by ID. Only `amount` and `price` can be updated.
@@ -12,6 +12,8 @@ module.exports = {
     method: 'PATCH',
     bodyLimit: 1024,
     schema: {
+      description: 'Partially update a resource by ID',
+      tags: ['resources'],
       params: {
         type: 'object',
         properties: {
@@ -21,11 +23,28 @@ module.exports = {
       },
       body: {
         type: 'object',
+        additionalProperties: false,
         required: ['price', 'amount'],
         properties: {
-          price: { type: 'number' },
-          amount: { type: 'number' },
+          price: { type: 'number', minimum: 0 },
+          amount: { type: 'number', minimum: 0 },
         },
+      },
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', format: 'uuid' },
+            name: { type: 'string' },
+            type: { type: 'string' },
+            price: { type: 'number', minimum: 0 },
+            amount: { type: 'number', minimum: 0 },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' },
+          },
+        },
+        400: { type: 'object', properties: { error: { type: 'string' } } },
+        500: { type: 'object', properties: { error: { type: 'string' } } },
       },
     },
     handler: async (request, reply) => {
@@ -38,7 +57,7 @@ module.exports = {
          * @type {{amount?: number, price?: number}}
          */ (request.body);
 
-        const patched = await resourceRepository.update(id, {
+        const patched = await resourcesRepository.update(id, {
           amount,
           price,
         });

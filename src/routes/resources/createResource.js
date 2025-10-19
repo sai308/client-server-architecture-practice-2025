@@ -1,4 +1,4 @@
-const { resourceRepository } = require('@/repositories/resources');
+const { resourcesRepository } = require('@/repositories/resources');
 
 /**
  * @description Route to create a new resource in the system.
@@ -12,15 +12,34 @@ module.exports = {
     method: 'POST',
     bodyLimit: 1024,
     schema: {
+      description: 'Create a new resource',
+      tags: ['resources'],
       body: {
         type: 'object',
         required: ['name', 'type'],
+        additionalProperties: false,
         properties: {
-          name: { type: 'string' },
-          type: { type: 'string' },
-          price: { type: 'number' },
-          amount: { type: 'number' },
+          name: { type: 'string', minLength: 3, maxLength: 100 },
+          type: { type: 'string', minLength: 3, maxLength: 50 },
+          price: { type: 'number', minimum: 0 },
+          amount: { type: 'number', minimum: 0 },
         },
+      },
+      response: {
+        201: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', format: 'uuid' },
+            name: { type: 'string' },
+            type: { type: 'string' },
+            price: { type: 'number', minimum: 0 },
+            amount: { type: 'number', minimum: 0 },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' },
+          },
+        },
+        400: { type: 'object', properties: { error: { type: 'string' } } },
+        500: { type: 'object', properties: { error: { type: 'string' } } },
       },
     },
     handler: async (request, reply) => {
@@ -34,7 +53,7 @@ module.exports = {
          * @type {{ name: string, type: string, amount?: number, price?: number }}
          */ (request.body);
 
-        const resource = await resourceRepository.create({
+        const resource = await resourcesRepository.create({
           name,
           type,
           amount,

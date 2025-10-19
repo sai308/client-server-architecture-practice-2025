@@ -1,4 +1,4 @@
-const { purchaseService } = require('@/services/purchase');
+const { executePurchase } = require('@/useCases/purchaseResources');
 
 /**
  * @description Route to purchase resources.
@@ -11,12 +11,14 @@ module.exports = {
     url: '/shop/purchase',
     method: 'POST',
     schema: {
+      description: 'Purchase resources',
+      tags: ['shop'],
       body: {
         type: 'object',
-        required: ['customerName', 'order'],
+        required: ['customerId', 'items'],
         properties: {
-          customerName: { type: 'string' },
-          order: {
+          customerId: { type: 'number' },
+          items: {
             type: 'array',
             items: {
               type: 'object',
@@ -33,22 +35,39 @@ module.exports = {
         201: {
           type: 'object',
           properties: {
-            _id: { type: 'string' },
-            customerName: { type: 'string' },
-            amount: { type: 'number' },
-            items: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  resourceId: { type: 'string' },
-                  name: { type: 'string' },
-                  quantity: { type: 'number' },
-                  price: { type: 'number' },
+            bill: {
+              type: 'object',
+              properties: {
+                _id: { type: 'string' },
+                customerId: { type: 'number' },
+                total: { type: 'number' },
+                items: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      resourceId: { type: 'string' },
+                      name: { type: 'string' },
+                      quantity: { type: 'number' },
+                      price: { type: 'number' },
+                    },
+                  },
                 },
+                createdAt: { type: 'string', format: 'date-time' },
               },
             },
-            createdAt: { type: 'string', format: 'date-time' },
+            user: {
+              type: 'object',
+              properties: {
+                id: { type: 'number' },
+                name: { type: 'string' },
+                age: { type: 'number' },
+                email: { type: 'string' },
+                balance: { type: 'number' },
+                createdAt: { type: 'string', format: 'date-time' },
+                updatedAt: { type: 'string', format: 'date-time' },
+              },
+            },
           },
         },
         400: { type: 'object', properties: { error: { type: 'string' } } },
@@ -57,19 +76,26 @@ module.exports = {
     },
     handler: async (request, reply) => {
       try {
-        const { customerName, order } =
-          /** @type {{ customerName: string, order: Services.Purchase.OrderItem[] }} */
+        const orderCandidate =
+          /** @type { Domain.Purchase.Order} */
           (request.body);
 
-        const bill = await purchaseService.purchaseResources(
-          order,
-          customerName
-        );
+        const opRes = await executePurchase(orderCandidate);
 
-        return reply.code(201).send(bill);
+        return reply.code(201).send(opRes);
       } catch (error) {
+        if (error.cause) {
+          request.log.debug(
+            error.cause,
+            'Request handling was interrupted by the handled error'
+          );
+        }
+
         request.log.error(error);
-        return reply.code(400).send({ error: error.message });
+
+        return reply
+          .code('cause' in error ? 400 : 500)
+          .send({ error: error.message });
       }
     },
   },

@@ -1,4 +1,4 @@
-const { resourceRepository } = require('@/repositories/resources');
+const { resourcesRepository } = require('@/repositories/resources');
 
 /**
  * @description Route to get a specific resource by ID.
@@ -11,12 +11,31 @@ module.exports = {
     url: '/resources/:id',
     method: 'GET',
     schema: {
+      description: 'Get a resource by ID',
+      tags: ['resources'],
       params: {
         type: 'object',
         properties: {
-          id: { type: 'string' },
+          id: { type: 'string', format: 'uuid' },
         },
         required: ['id'],
+      },
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', format: 'uuid' },
+            name: { type: 'string' },
+            type: { type: 'string' },
+            price: { type: 'number', minimum: 0 },
+            amount: { type: 'number', minimum: 0 },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' },
+          },
+        },
+        400: { type: 'object', properties: { error: { type: 'string' } } },
+        404: { type: 'object', properties: { message: { type: 'string' } } },
+        500: { type: 'object', properties: { error: { type: 'string' } } },
       },
     },
     handler: async (request, reply) => {
@@ -25,7 +44,7 @@ module.exports = {
          * @type {{ id: string }}
          */ (request.params);
 
-        const found = await resourceRepository.findById(id);
+        const found = await resourcesRepository.findById(id);
 
         if (!found) {
           return reply.code(404).send({
