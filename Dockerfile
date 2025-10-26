@@ -1,4 +1,20 @@
-FROM node:22
+FROM node:22.21.0
+
+# Set SHELL environment variable to a supported shell
+ENV SHELL=/bin/bash
+
+# Install pnpm globally using corepack
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# Set PNPM_HOME to define the global bin directory and add it to PATH
+ENV PNPM_HOME=/node/.local/share/pnpm
+ENV PATH=$PNPM_HOME:$PATH
+
+# Run pnpm setup to configure global bin directory
+RUN pnpm setup
+
+# Install nodemon globally for development environment
+RUN pnpm install -g nodemon
 
 # Create and set the working directory inside the container
 WORKDIR /srv/app
@@ -9,8 +25,11 @@ RUN npm install -g nodemon
 # Copy package.json (+ package-lock.json) and install dependencies
 COPY package*.json ./
 
+# Fetch dependencies for caching, without creating a node_modules folder
+RUN pnpm fetch
+
 # Install dependencies
-RUN npm install
+RUN pnpm install
 
 # Copy the rest of the application
 COPY --chown=node:node . .
@@ -25,4 +44,4 @@ EXPOSE 3000 9229
 ENV NODE_ENV=development
 
 # Use nodemon for automatic server reloads in development
-CMD ["npm", "run", "dev"]
+CMD ["pnpm", "run", "dev"]
