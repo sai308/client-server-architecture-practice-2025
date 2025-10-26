@@ -54,3 +54,6 @@ docker-compose*.yml
 # Misc
 coverage-reports
 reports
+
+# Nginx secrets
+nginx/secrets
