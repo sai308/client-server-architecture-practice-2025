@@ -141,6 +141,8 @@ vite.config.ts.timestamp-*
 
 # Package lock files
 package-lock.json
+package-lock.yaml
+pnpm-lock.yaml
 
 # vscode settings
 .vscode/*
