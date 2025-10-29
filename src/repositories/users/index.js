@@ -1,5 +1,5 @@
 const { $db, $schemas } = require('@/adapters/postgres');
-const { eq, ilike, or } = require('drizzle-orm');
+const { eq, ilike, or, desc } = require('drizzle-orm');
 
 /**
  * @description A repository for managing users
@@ -8,8 +8,7 @@ const { eq, ilike, or } = require('drizzle-orm');
 class UsersRepository {
   /**
    * Create a new user with the given data
-   * @param {Domain.User} userData
-   * @returns {Promise<Repositories.UserRecord>}
+   * @type {Repositories.UsersRepository['create']}
    */
   async create(userData) {
     const syncedTimestamp = new Date();
@@ -29,8 +28,7 @@ class UsersRepository {
 
   /**
    * Find a user with the given ID
-   * @param {number} id
-   * @returns {Promise<Repositories.UserRecord | null>}
+   * @type {Repositories.UsersRepository['findById']}
    */
   async findById(id) {
     if (!id) {
@@ -42,19 +40,91 @@ class UsersRepository {
       .from($schemas.users)
       .where(eq($schemas.users.id, id));
 
-    if (!user) {
-      throw new Error('User not found');
+    return user || null;
+  }
+
+  /**
+   * Find a user with the given ID
+   * @type {Repositories.UsersRepository['findByIdWithLastSession']}
+   */
+  async findByIdWithLastSession(id) {
+    if (!id) {
+      return null;
     }
 
-    return user;
+    const userWithLastSession = await $db.query.users.findFirst({
+      where: eq($schemas.users.id, id),
+      with: {
+        sessions: {
+          orderBy: () => [desc($schemas.sessions.createdAt)],
+          limit: 1,
+        },
+      },
+    });
+
+    if (!userWithLastSession) {
+      return null;
+    }
+
+    const { sessions, ...restUser } = userWithLastSession;
+
+    return {
+      ...restUser,
+      lastSession: sessions.length > 0 ? sessions[0] : null,
+    };
+  }
+
+  /**
+   * Find a user with the given ID and session ID
+   * @type {Repositories.UsersRepository['findByIdWithTargetSession']}
+   */
+  async findByIdWithTargetSession(userId, sessionId) {
+    if (!userId) {
+      return null;
+    }
+
+    const userWithTargetSession = await $db.query.users.findFirst({
+      where: eq($schemas.users.id, userId),
+      with: {
+        sessions: {
+          where: eq($schemas.sessions.id, sessionId),
+          limit: 1,
+        },
+      },
+    });
+
+    if (!userWithTargetSession) {
+      return null;
+    }
+
+    const { sessions, ...restUser } = userWithTargetSession;
+
+    return {
+      ...restUser,
+      session: sessions.length > 0 ? sessions[0] : null,
+    };
+  }
+
+  /**
+   * Find a user by his username.
+   * @type {Repositories.UsersRepository['findByUsername']}
+   */
+  async findByUsername(username) {
+    if (!username) {
+      return null;
+    }
+
+    const [user] = await $db
+      .select()
+      .from($schemas.users)
+      .where(eq($schemas.users.username, username));
+
+    return user || null;
   }
 
   /**
    * Read all users from the database
-   * @param {string} search
-   * @param {number} [page=1]
-   * @param {number} [limit=10]
-   * @returns {Promise<Repositories.UserRecord[]>}
+   * @type {Repositories.UsersRepository['findAll']}
    */
   async findAll(search, page = 1, limit = 10) {
     const _limit = Math.min(50, limit);
@@ -122,10 +192,13 @@ class UsersRepository {
    */
   async materialize(entity) {
     const record = await this.create({
+      age: entity.age,
       name: entity.name,
       email: entity.email,
       balance: entity.balance,
-      age: entity.age,
+      username: entity.username,
+      passwordHash: entity.passwordHash,
+      isPrivileged: entity.isPrivileged,
     });
 
     return record;
@@ -142,10 +215,6 @@ class UsersRepository {
       .delete($schemas.users)
       .where(eq($schemas.users.id, id))
       .returning();
-
-    if (!deletedUser) {
-      throw new Error('User not found');
-    }
 
     return deletedUser;
   }

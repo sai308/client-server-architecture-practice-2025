@@ -24,6 +24,37 @@ declare namespace Repositories {
     findById(id: number): Promise<UserRecord | null>;
 
     /**
+     * Find a user by his ID. Eager loads the last session.
+     * @param id - The ID of the user.
+     * @returns A promise that resolves to the user with session if found, or null.
+     */
+    findByIdWithLastSession(
+      id: number
+    ): Promise<
+      (UserRecord & { lastSession: Repositories.SessionRecord | null }) | null
+    >;
+
+    /**
+     * Find a user by his ID. Eager loads the session.
+     * @param userId - The ID of the user.
+     * @param sessionId - The ID of the session.
+     * @returns A promise that resolves to the user with session if found, or null.
+     */
+    findByIdWithTargetSession(
+      userId: number,
+      sessionId: string
+    ): Promise<
+      (UserRecord & { session: Repositories.SessionRecord | null }) | null
+    >;
+
+    /**
+     * Find a user by his username.
+     * @param username - The username of the user.
+     * @returns A promise that resolves to the user if found, or null.
+     */
+    findByUsername(username: string): Promise<UserRecord | null>;
+
+    /**
      * Get all users with optional search and pagination.
      * @param search - The search term to filter users.
      * @param page - The page number for pagination.

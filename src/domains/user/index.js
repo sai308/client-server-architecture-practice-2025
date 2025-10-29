@@ -11,6 +11,9 @@ class User {
     this.age = fields.age;
     this.email = fields.email;
     this.balance = fields.balance ?? 0;
+    this.username = fields.username;
+    this.passwordHash = fields.passwordHash;
+    this.isPrivileged = false;
   }
 
   /**

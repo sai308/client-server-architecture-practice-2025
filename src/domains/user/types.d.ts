@@ -4,6 +4,9 @@ declare namespace Domain {
     age: number;
     email: string;
     balance: number;
+    username: string;
+    passwordHash: string;
+    isPrivileged: boolean;
   };
 
   export interface UserEntity extends User {
@@ -17,5 +20,7 @@ declare namespace Domain {
     age: number;
     email: string;
     balance?: number;
+    username: string;
+    passwordHash: string;
   };
 }
