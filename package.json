@@ -1,6 +1,6 @@
 {
   "name": "client-server-architecture-practice-2025",
-  "version": "1.0.0",
+  "version": "0.5.0",
   "description": "",
   "main": "./src/server.js",
   "scripts": {
@@ -28,6 +28,7 @@
   },
   "homepage": "https://github.com/sai308/client-server-architecture-practice-2025#readme",
   "devDependencies": {
+    "@types/json-schema": "^7.0.15",
     "@types/node": "24.5.2",
     "eslint": "9.37.0",
     "eslint-config-prettier": "10.1.8",
@@ -37,10 +38,15 @@
     "prettier": "3.6.2"
   },
   "dependencies": {
+    "@fastify/auth": "5.0.3",
+    "@fastify/cookie": "11.0.2",
+    "@fastify/error": "4.2.0",
+    "@fastify/request-context": "6.2.1",
     "@fastify/swagger": "9.5.2",
     "@mgcrea/fastify-request-logger": "1.9.1",
     "@mgcrea/pino-pretty-compact": "1.4.2",
     "@types/pg": "8.15.5",
+    "bcrypt": "6.0.0",
     "dotenv": "17.2.2",
     "drizzle-kit": "0.31.5",
     "drizzle-orm": "0.44.6",
