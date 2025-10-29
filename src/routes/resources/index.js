@@ -15,10 +15,10 @@ const { deleteResource } = require('./deleteResource');
  * @param {object} _opts
  */
 module.exports.resourcesRouter = async function (fastify, _opts) {
-  fastify.route(createResource);
+  fastify.route(createResource(fastify));
   fastify.route(getResources);
   fastify.route(getResource);
-  fastify.route(updateResource);
-  fastify.route(patchResource);
-  fastify.route(deleteResource);
+  fastify.route(updateResource(fastify));
+  fastify.route(patchResource(fastify));
+  fastify.route(deleteResource(fastify));
 };

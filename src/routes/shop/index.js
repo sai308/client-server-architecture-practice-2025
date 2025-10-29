@@ -7,7 +7,7 @@ const { getPurchaseBill } = require('./bill');
  * @param {object} _opts
  */
 module.exports.shopRouter = async function (fastify, _opts) {
-  fastify.route(purchaseResources);
-  fastify.route(getPurchaseBill);
-  fastify.route(refundPurchase);
+  fastify.route(purchaseResources(fastify));
+  fastify.route(getPurchaseBill(fastify));
+  fastify.route(refundPurchase(fastify));
 };
