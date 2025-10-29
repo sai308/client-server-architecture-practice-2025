@@ -23,7 +23,7 @@ const PG = {
 };
 
 function pgErrorToHttp(pgErr) {
-  switch (pgErr.code) {
+  switch (pgErr?.code) {
     case PG.UNIQUE:
       return { status: 409, code: 'unique_violation' };
     case PG.FK:

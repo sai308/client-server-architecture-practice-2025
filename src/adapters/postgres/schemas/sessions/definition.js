@@ -11,7 +11,7 @@ const { users } = require('@/adapters/postgres/schemas/users/definition');
 
 const sessions = pgTable('sessions', {
   id: uuid('id').defaultRandom().primaryKey(), // UUID as primary key
-  fp: varchar('fp', { length: 32 }).unique().notNull(),
+  fp: varchar('fp', { length: 64 }).unique().notNull(),
   userId: integer('user_id')
     .notNull()
     .references(() => users.id, {
