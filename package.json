@@ -4,7 +4,8 @@
   "description": "",
   "main": "./src/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --test --require ./tests/setup.js",
+    "test:watch": "node --test --watch --require ./tests/setup.js",
     "start": "node ./src/server.js",
     "dev": "nodemon --inspect=0.0.0.0:9229 ./src/server.js",
     "lint": "eslint ./src --fix",

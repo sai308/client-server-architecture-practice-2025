@@ -10,7 +10,8 @@
     // allow path aliasing relative to project root
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@": ["src"]
     },
     // enable basic JS type checking in editor
     "checkJs": true,
@@ -22,6 +23,6 @@
     "enable": true
   },
   // files/folders to include in project intelligence
-  "include": ["src/**/*", "test/**/*", "index.js"],
+  "include": ["src/**/*", "tests/**/*", "index.js"],
   "exclude": ["node_modules", "dist", "build"]
 }
