@@ -2,37 +2,28 @@ name: Lint Codebase
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   pull_request:
-    branches: [main]
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
-permissions:
-  contents: read
+    branches:
+      - main
 
 jobs:
   lint:
     runs-on: ubuntu-latest
-    env:
-      CI: true
 
     steps:
       - name: Check out the repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Set up Node.js 22
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
-          cache: 'npm'
+          node-version: '22' # Adjust based on your project's requirements
 
-      - name: Install dependencies (locked)
-        run: npm i
+      - name: Install dependencies
+        run: npm install
 
+      # Run ESLint
       - name: Run ESLint
         run: npm run lint
