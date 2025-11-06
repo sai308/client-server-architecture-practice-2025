@@ -10,6 +10,7 @@ module.exports.createResource = (fastify) => ({
   method: 'POST',
   bodyLimit: 1024,
   schema: {
+    security: [{ cookieAuth: [], apiKeyAuth: [] }],
     description: 'Create a new resource',
     tags: ['resources'],
     body: {
@@ -41,7 +42,7 @@ module.exports.createResource = (fastify) => ({
     },
   },
   preValidation: fastify.auth([
-    fastify.authPipeFactory(),
+    fastify.authPipeFactory({ allowApiKey: true, allowSession: true }),
     fastify.authGuardFactory({
       isPrivilegeRequired: true,
     }),

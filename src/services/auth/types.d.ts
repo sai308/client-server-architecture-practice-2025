@@ -24,7 +24,8 @@ declare namespace Services {
      */
     authenticate(
       user: Repositories.UserRecord,
-      password: string
+      password: string,
+      silent?: boolean
     ): Promise<AuthenticatedUser>;
 
     /**

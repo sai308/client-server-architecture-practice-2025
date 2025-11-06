@@ -20,7 +20,10 @@ for (const [key, value] of Object.entries(schemasWithRelations)) {
 
 const pool = new Pool({ connectionString: env.PG_DATABASE_URL });
 
-const db = drizzle(pool, { schema: schemasWithRelations });
+const db = drizzle(pool, {
+  schema: schemasWithRelations,
+  casing: 'snake_case',
+});
 
 // Utility function to test the database connection
 const testConnection = async () => {

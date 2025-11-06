@@ -33,12 +33,12 @@ module.exports.authPipeFactory = (config = {}) => {
             ...authData,
             method: 'session',
           });
+
+          return;
         }
       } catch (error) {
         request.log.error(error, 'Error while processing the session cookie');
       }
-
-      return;
     }
 
     const apiKey = request.headers['x-api-key'];

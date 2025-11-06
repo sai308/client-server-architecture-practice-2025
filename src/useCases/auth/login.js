@@ -21,7 +21,8 @@ module.exports.executeLogin = async (username, password, deviceInfo) => {
 
     const authenticatedUser = await authService.authenticate(
       userCandidate,
-      password
+      password,
+      true
     );
 
     if (!authenticatedUser) {
