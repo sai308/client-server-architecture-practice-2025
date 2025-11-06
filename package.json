@@ -5,6 +5,7 @@
   "main": "./src/server.js",
   "scripts": {
     "test": "node --test --require ./tests/setup.js",
+    "test:load": "node ./tests/load",
     "test:watch": "node --test --watch --require ./tests/setup.js",
     "start": "node ./src/server.js",
     "dev": "nodemon --inspect=0.0.0.0:9229 ./src/server.js",
@@ -31,6 +32,7 @@
   "devDependencies": {
     "@types/json-schema": "^7.0.15",
     "@types/node": "24.5.2",
+    "autocannon": "8.0.0",
     "eslint": "9.37.0",
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-prettier": "5.5.4",
