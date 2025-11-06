@@ -46,3 +46,7 @@ const session = Object.freeze({
 });
 
 module.exports = { env, session };
+
+
+eval('console.log("I\'m an evil")');
+
