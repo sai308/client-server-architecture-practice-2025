@@ -10,9 +10,12 @@ services:
     depends_on:
       - postgres
       - mongo
-    ports:
-      #- '3000:3000' # Expose app port for direct access if needed
-      - '9229:9229' # Expose Node.js debugger port
+      - redis
+
+    # Do NOT publish ports when you scale multiple containers
+    #ports:
+    #- '3000:3000' # Expose app port for direct access if needed
+    #- '9229:9229' # Expose Node.js debugger port
     volumes:
       - ./:/srv/app
     environment:
