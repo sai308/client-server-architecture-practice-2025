@@ -1,3 +1,4 @@
+const { getCurrencyRates } = require('./currencyRates');
 const { purchaseResources } = require('./purchase');
 const { refundPurchase } = require('./refund');
 const { getPurchaseBill } = require('./bill');
@@ -10,4 +11,5 @@ module.exports.shopRouter = async function (fastify, _opts) {
   fastify.route(purchaseResources(fastify));
   fastify.route(getPurchaseBill(fastify));
   fastify.route(refundPurchase(fastify));
+  fastify.route(getCurrencyRates);
 };
