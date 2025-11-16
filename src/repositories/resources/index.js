@@ -1,5 +1,5 @@
 const { $db, $schemas } = require('@/adapters/postgres');
-const { eq, or, ilike, inArray } = require('drizzle-orm');
+const { eq, or, ilike, count, inArray, min, max, avg } = require('drizzle-orm');
 
 /**
  * @description A repository for managing resources
@@ -85,6 +85,77 @@ class ResourcesRepository {
       .where(condition)
       .offset(offset)
       .limit(_limit);
+  }
+
+  /**
+   * @type {Repositories.ResourcesRepository['getPaginatedList']}
+   */
+  async getPaginatedList(search, page, limit = 25) {
+    const _limit = Math.min(50, limit);
+    const offset = (Math.max(1, page) - 1) * _limit;
+
+    const condition = search
+      ? or(
+          ilike($schemas.resources.name, `%${search}%`),
+          ilike($schemas.resources.type, `%${search}%`)
+        )
+      : undefined;
+
+    const startTime = Date.now();
+
+    // run data fetch, count, and stats in parallel
+    const resourcesPromise = $db
+      .select()
+      .from($schemas.resources)
+      .where(condition)
+      .offset(offset)
+      .limit(_limit);
+
+    const countPromise = $db
+      .select({ count: count() })
+      .from($schemas.resources)
+      .where(condition);
+
+    const statsPromise = $db
+      .select({
+        priceMin: min($schemas.resources.price),
+        priceMax: max($schemas.resources.price),
+        priceAvg: avg($schemas.resources.price),
+        amountMin: min($schemas.resources.amount),
+        amountMax: max($schemas.resources.amount),
+        amountAvg: avg($schemas.resources.amount),
+      })
+      .from($schemas.resources)
+      .where(condition);
+
+    const [resources, totalRecords, statsRecords] = await Promise.all([
+      resourcesPromise,
+      countPromise,
+      statsPromise,
+    ]);
+
+    const [total] = totalRecords;
+    const [stats] = statsRecords;
+
+    return {
+      items: resources,
+      total: total.count,
+      pages: Math.ceil(total.count / _limit),
+      stats: {
+        price: {
+          min: stats.priceMin || 0,
+          max: stats.priceMax || 0,
+          avg: stats.priceAvg ? parseFloat(String(stats.priceAvg)) : 0,
+        },
+        amount: {
+          min: stats.amountMin || 0,
+          max: stats.amountMax || 0,
+          avg: stats.amountAvg ? parseFloat(String(stats.amountAvg)) : 0,
+        },
+        resolvedInMs: Date.now() - startTime,
+      },
+      queryParams: { search, page, limit },
+    };
   }
 
   /**

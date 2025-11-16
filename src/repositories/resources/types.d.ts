@@ -44,6 +44,37 @@ declare namespace Repositories {
     ): Promise<ResourceRecord[]>;
 
     /**
+     * Get paginate resources with total count.
+     * @param search - The search term to filter resources.
+     * @param page - The page number for pagination.
+     * @param limit - The number of resources per page.
+     * @returns A promise that resolves to the list of resources and metadata.
+     */
+    getPaginatedList(
+      search: string,
+      page?: number,
+      limit?: number
+    ): Promise<{
+      items: ResourceRecord[];
+      total: number;
+      pages: number;
+      stats: {
+        price: {
+          min: number;
+          max: number;
+          avg: number;
+        };
+        amount: {
+          min: number;
+          max: number;
+          avg: number;
+        };
+        resolvedInMs: number;
+      };
+      queryParams: { search: string; page?: number; limit?: number };
+    }>;
+
+    /**
      * Update a resource by its ID.
      * @param id - The ID of the resource.
      * @param resourceData - The data to update.
