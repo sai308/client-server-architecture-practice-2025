@@ -21,6 +21,10 @@ const env = Object.freeze({
     process.env.MONGO_DATABASE_URL || 'mongodb://localhost:27017',
   MONGO_DB_NAME: process.env.MONGO_DB || 'app_db',
 
+  REDIS_URL: process.env.REDIS_URL || 'redis://localhost:6379',
+
+  DISABLE_CACHE: process.env.APP_DISABLE_CACHE === 'true',
+
   PORT: Number(process.env.APP_PORT) || 3000,
   HOST: process.env.APP_HOST || '0.0.0.0',
 

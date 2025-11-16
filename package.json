@@ -30,6 +30,7 @@
   },
   "homepage": "https://github.com/sai308/client-server-architecture-practice-2025#readme",
   "devDependencies": {
+    "@faker-js/faker": "10.1.0",
     "@types/json-schema": "^7.0.15",
     "@types/node": "24.5.2",
     "autocannon": "8.0.0",
@@ -37,6 +38,7 @@
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-prettier": "5.5.4",
     "husky": "9.1.7",
+    "ioredis": "5.8.2",
     "neostandard": "0.12.2",
     "prettier": "3.6.2"
   },

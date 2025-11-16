@@ -6,8 +6,7 @@ services:
     env_file: .env
     networks:
       - web_net
-      - postgres_subnet
-      - mongo_subnet
+      - app_subnet
     depends_on:
       - postgres
       - mongo
@@ -20,6 +19,7 @@ services:
       - NODE_ENV=development
       - PG_DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       - MONGO_DATABASE_URL=mongodb://mongo:27017
+      - REDIS_URL=redis://redis:6379
 
   nginx:
     image: nginx:stable-alpine
@@ -41,7 +41,7 @@ services:
   postgres:
     image: postgres:latest
     networks:
-      - postgres_subnet
+      - app_subnet
     ports:
       #   - "5432:5432"    # PostgreSQL port
       - ${DEV_POSTGRES_PORT:-}
@@ -55,22 +55,30 @@ services:
   mongo:
     image: mongo:latest
     networks:
-      - mongo_subnet
+      - app_subnet
     ports:
       #   - "27017:27017"  # MongoDB port
       - ${DEV_MONGO_PORT:-}
     volumes:
       - mongo-data:/data/db
 
+  redis:
+    image: redis:latest
+    networks:
+      - app_subnet
+    ports:
+      - '6379:6379' # Redis port
+    volumes:
+      - redis-data:/data
+
 networks:
   web_net:
     driver: bridge
-  mongo_subnet:
-    driver: bridge
 
-  postgres_subnet:
+  app_subnet:
     driver: bridge
 
 volumes:
   postgres-data:
   mongo-data:
+  redis-data:

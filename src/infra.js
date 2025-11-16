@@ -32,8 +32,14 @@ const bootstrapInfra = async () => {
 
     logger.info('✅ MongoDB connection established.');
 
-    // Add other infrastructure components here if needed
-    // Example: Redis, etc.
+    // Test Redis connection
+    logger.info('🧠 Testing Redis connection...');
+    const redisAdapter = require('./adapters/redis');
+    await redisAdapter.testConnection();
+
+    infrastructureMap.set('redis', redisAdapter);
+
+    logger.info('✅ Redis connection established.');
 
     logger.info('🎉 Infrastructure initialized successfully.');
   } catch (error) {
