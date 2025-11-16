@@ -23,6 +23,6 @@
     "enable": true
   },
   // files/folders to include in project intelligence
-  "include": ["src/**/*", "tests/**/*", "index.js"],
+  "include": ["src/**/*", "tests/**/*", "scripts/**/*", "index.js"],
   "exclude": ["node_modules", "dist", "build"]
 }
