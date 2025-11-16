@@ -1,1 +1,2 @@
-require('./auth.routes');
+// require('./auth.routes');
+require('./cache.routes');
