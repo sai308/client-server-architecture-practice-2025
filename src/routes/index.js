@@ -1,6 +1,7 @@
 const { echoRoute } = require('./echo');
 const { shopRouter } = require('./shop');
 const { authRouter } = require('./auth');
+const { healthCheck } = require('./healthCheck');
 const { resourcesRouter } = require('./resources');
 
 /**
@@ -10,6 +11,8 @@ const { resourcesRouter } = require('./resources');
 module.exports.patchRouting = (fastify) => {
   // Register routes
   fastify.register(echoRoute);
+  fastify.register(healthCheck);
+
   fastify.register(resourcesRouter);
   fastify.register(shopRouter);
   fastify.register(authRouter);
