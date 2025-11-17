@@ -18,7 +18,15 @@ for (const [key, value] of Object.entries(schemasWithRelations)) {
   }
 }
 
-const pool = new Pool({ connectionString: env.PG_DATABASE_URL });
+const pool = new Pool({
+  connectionString: env.PG_DATABASE_URL,
+  // Production-optimized pool settings
+  max: env.IS_PROD_ENV ? 20 : 10, // Max connections per instance (20 * 4 = 80 total)
+  min: env.IS_PROD_ENV ? 5 : 2, // Keep minimum connections ready
+  idleTimeoutMillis: 30000, // Close idle connections after 30s
+  connectionTimeoutMillis: 5000, // Wait 5s for connection
+  maxUses: 7500, // Recycle connections after 7500 uses
+});
 
 const db = drizzle(pool, {
   schema: schemasWithRelations,

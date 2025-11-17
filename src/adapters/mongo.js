@@ -16,7 +16,15 @@ const ctx = Object.assign(Object.create(null), {
  * Utility function to test the MongoDB connection
  */
 const testConnection = async () => {
-  const client = new MongoClient(env.MONGO_DATABASE_URL);
+  const client = new MongoClient(env.MONGO_DATABASE_URL, {
+    // Production-optimized connection pool settings
+    maxPoolSize: env.IS_PROD_ENV ? 20 : 10, // Max connections per instance
+    minPoolSize: env.IS_PROD_ENV ? 5 : 2, // Keep minimum connections ready
+    maxIdleTimeMS: 30000, // Close idle connections after 30s
+    serverSelectionTimeoutMS: 5000, // Wait 5s for server selection
+    socketTimeoutMS: 45000, // Socket timeout
+    connectTimeoutMS: 10000, // Connection timeout
+  });
   ctx.client = client;
 
   await client.connect();

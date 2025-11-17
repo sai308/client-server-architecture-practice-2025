@@ -63,6 +63,14 @@ const shutdownInfra = async () => {
       await infrastructureMap.get('mongo').closeConnection();
       logger.info('MongoDB connection closed.');
     }
+
+    // Close Redis connection
+    if (infrastructureMap.has('redis')) {
+      await infrastructureMap.get('redis').closeConnection();
+      logger.info('Redis connection closed.');
+    }
+
+    logger.info('Infrastructure shutdown complete.');
   } catch (error) {
     logger.error(error, 'Error during infrastructure shutdown');
   }
