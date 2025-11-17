@@ -1,0 +1,209 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    image: node-app:production
+    env_file: .env
+    networks:
+      - web_net
+      - app_subnet
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongo:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    # Do NOT publish ports when you scale multiple containers
+    # Nginx will handle all external traffic
+    environment:
+      - NODE_ENV=production
+      - PG_DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - MONGO_DATABASE_URL=mongodb://mongo:27017
+      - REDIS_URL=redis://redis:6379
+    # No volume mounts in production - code is baked into the image
+    deploy:
+      replicas: 4 # Start with 4 instances by default
+      resources:
+        limits:
+          cpus: '1.5' # Increased from 1.0 for better performance
+          memory: 768M # Increased from 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  nginx:
+    image: nginx:stable-alpine
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./nginx/default.prod.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/secrets/.htpasswd:/etc/nginx/.htpasswd:ro
+      - ./nginx/secrets/certs:/etc/nginx/certs:ro
+      - ./static:/usr/share/nginx/static:ro
+      - ./html:/usr/share/nginx/html:ro
+    networks:
+      - web_net
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0' # Increased from 0.5 for better performance
+          memory: 256M # Increased from 128M
+        reservations:
+          cpus: '0.25'
+          memory: 64M
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'wget',
+          '--quiet',
+          '--tries=1',
+          '--spider',
+          'http://127.0.0.1:80/api/health',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  postgres:
+    image: postgres:latest
+    restart: unless-stopped
+    networks:
+      - app_subnet
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=C --lc-ctype=C
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0' # Increased from 1.0 for better query performance
+          memory: 1536M # Increased from 1G for larger cache
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    command:
+      - 'postgres'
+      - '-c'
+      - 'max_connections=200'
+      - '-c'
+      - 'shared_buffers=384MB' # Increased from 256MB (~25% of memory)
+      - '-c'
+      - 'effective_cache_size=1152MB' # Increased from 1GB (~75% of memory)
+      - '-c'
+      - 'maintenance_work_mem=96MB' # Increased from 64MB
+      - '-c'
+      - 'checkpoint_completion_target=0.9'
+      - '-c'
+      - 'wal_buffers=16MB'
+      - '-c'
+      - 'default_statistics_target=100'
+      - '-c'
+      - 'random_page_cost=1.1'
+      - '-c'
+      - 'effective_io_concurrency=200'
+      - '-c'
+      - 'work_mem=1966kB' # Increased from 1310kB
+      - '-c'
+      - 'min_wal_size=1GB'
+      - '-c'
+      - 'max_wal_size=4GB'
+
+  mongo:
+    image: mongo:latest
+    restart: unless-stopped
+    networks:
+      - app_subnet
+    volumes:
+      - mongo-data:/data/db
+      - mongo-config:/data/configdb
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0' # Increased from 1.0 for better performance
+          memory: 1536M # Increased from 1G for larger WiredTiger cache
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    command: ['mongod', '--bind_ip_all', '--wiredTigerCacheSizeGB', '1.0'] # Increased from 0.5GB
+
+  redis:
+    image: redis:latest
+    restart: unless-stopped
+    networks:
+      - app_subnet
+    volumes:
+      - redis-data:/data
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0' # Increased from 0.5 for better performance
+          memory: 512M # Increased from 256M for larger cache
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    command:
+      - 'redis-server'
+      - '--maxmemory'
+      - '400mb' # Increased from 200mb for better caching
+      - '--maxmemory-policy'
+      - 'allkeys-lru'
+      - '--save'
+      - '60'
+      - '1000'
+      - '--appendonly'
+      - 'yes'
+      - '--appendfsync'
+      - 'everysec'
+
+networks:
+  web_net:
+    driver: bridge
+
+  app_subnet:
+    driver: bridge
+    internal: true # Isolate backend services from external access
+
+volumes:
+  postgres-data:
+    driver: local
+  mongo-data:
+    driver: local
+  mongo-config:
+    driver: local
+  redis-data:
+    driver: local
